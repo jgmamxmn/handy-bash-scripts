@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Usage: pdf_pagepull <input file> <page no or page range> <output file>
+
+pdftk $1 cat $2 output $3
+

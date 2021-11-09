@@ -1,0 +1,29 @@
+#!/bin/bash -e
+
+# Usage: pdf_compress input output hi|med|lo
+
+if [ "$3" == "hi" ]; then
+	qual="printer"
+	extra=""
+elif [ "$3" == "med" ]; then
+	qual="ebook"
+	extra="-dEmbedAllFonts=false"
+elif [ "$3" == "medlo_color" ]; then
+	qual="ebook"
+	extra="-dColorImageResolution=96 -dGrayImageResolution=96 -dEmbedAllFonts=false"
+elif [ "$3" == "medlo" ]; then
+	qual="ebook"
+	# standard ebook resolution is 150; standard screen resolution is 72
+	extra="-dColorImageResolution=96 -dGrayImageResolution=96 -dEmbedAllFonts=false -dColorConversionStrategy=/Gray -dProcessColorModel=/DeviceGray"
+elif [ "$3" == "lo" ]; then
+	qual="screen"
+	extra="-dColorConversionStrategy=/Gray -dProcessColorModel=/DeviceGray"
+else
+	echo 'Usage: pdf_compress (input_filename) (output_filename) (hi/med/medlo/medlo_color/lo)'
+	false;
+fi
+
+# dPrinted=false preserves hyperlinks
+
+gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/$qual $extra -dPrinted=false -dNOPAUSE -dBATCH -dQUIET -sOutputFile="$2" "$1"
+

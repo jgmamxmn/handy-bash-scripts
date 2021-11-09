@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Usage: pdf_flatten <input file> <output file>
+
+tmpps="/var/tmp/pdf_flatten_temp.ps"
+tmpfile="/var/tmp/pdf_flatten_temp.pdf"
+
+echo Step 1 of 3: flattening file...
+pdf2ps $1 $tmpps
+ps2pdf $tmpps $tmpfile
+rm $tmpps
+
+
+size1=`stat -c %s $1`
+size2=`stat -c %s $tmpfile`
+
+# Can only do integer multiplication, so multiply by 12 and 10 respectively to get 120% gross-up on size1
+size1=$(expr $size1 \* 12)
+size2=$(expr $size2 \* 10)
+
+# echo $size1
+# echo $size2
+
+if [[ "$size2" -gt "$size1" ]]
+then
+        echo Step 2 of 3: flattened file is materially bigger - compressing...
+        gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dBATCH  -dQUIET -dColorImageResolution=250 -sOutputFile=$2 $tmpfile
+else
+        echo Step 2 of 3: flattened file size is reasonable - skipping compression.
+		cp $tmpfile $2
+fi
+
+
+echo Step 3 of 3: cleanup
+rm $tmpfile
+
